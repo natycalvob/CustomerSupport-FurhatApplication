@@ -49,5 +49,16 @@ val CustomerSupport = state {
                 "a new order for either TV-2 or TV-3 with a 20% discount. The second solution is to keep " +
                 "the current order which has a waiting time of 6 weeks, and we offer a 30% discount on the " +
                 "total price of the item.")
+        furhat.ask("Does any of this alternatives work for you?")
+    }
+
+    onResponse<Refund> {
+        furhat.say("Okay, the company understands your decision. We will proceed with the refund of the total amount you paid for the initial order.")
+        furhat.ask(" Is there anything else I can help you with?")
+    }
+
+    onResponse<CompensationOption> {
+        furhat.say("We have $(Compensation().optionsToText()")
+        furhat.ask("Does any of this alternatives work for you?")
     }
 }

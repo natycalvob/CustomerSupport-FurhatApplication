@@ -1,19 +1,22 @@
 package furhatos.app.myfirstskill.nlu
 
+import furhatos.nlu.ComplexEnumEntity
 import furhatos.nlu.EnumEntity
 import furhatos.nlu.Intent
+import furhatos.nlu.ListEntity
 import furhatos.util.Language
 
 class Product : EnumEntity(stemming = true, speechRecPhrases = true) {
     override fun getEnum(lang: Language): List<String> {
-        return listOf("TV", "laptop", "play station", "ipad")
+        return listOf("TV", "laptop", "play station", "iPad", "cameras")
     }
 }
 
-class IdentifyProblem(val product: Product? = null) : Intent () {
+class IdentifyProblem(val products: ProductList? = null) : Intent () {
     override fun getExamples(lang: Language): List<String> {
-        return listOf("@product", "I have a problem with my @product", "I bought a @product and it is not working",
-        "I ordered a @product through your website and received the wrong reference")
+        return listOf("@products", "I have a problem with my @products",
+                "I bought a @products and it is not working",
+                "I ordered a @products through your website and received the wrong reference")
     }
 }
 
@@ -49,5 +52,21 @@ class CompensationOption: Intent() {
         "Do you have other alternative for compensation?",
         "I don't think the options you offer are suitable for my case",
         "What about getting a different product?")
+    }
+}
+
+class ProductList : ListEntity<QuantifiedProduct> ()
+
+class QuantifiedProduct(
+        val count : furhatos.nlu.common.Number? =
+                furhatos.nlu.common.Number(1),
+        val product: Product? = null) : ComplexEnumEntity() {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf("@count @product", "@product")
+    }
+
+    override fun toText(): String {
+        return generate("$count $product")
     }
 }

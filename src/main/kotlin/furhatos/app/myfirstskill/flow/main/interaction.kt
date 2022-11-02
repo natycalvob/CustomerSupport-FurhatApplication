@@ -26,7 +26,13 @@ val CustomerSupport = state {
     }
 
     onResponse<IdentifyProblem> {
-        furhat.say("I understand that you have an issue with your ${it.intent.product}, Let me check!")
+        val products = it.intent.products
+        if (products != null) {
+            furhat.say("I understand that you have an issue with your ${products.text}, Let me check!")
+            products.list.forEach {
+                users.current.productproblem.products.list.add(it)
+            }
+        }
         furhat.ask("Do you have a reference number of your order?")
     }
 
@@ -53,12 +59,13 @@ val CustomerSupport = state {
     }
 
     onResponse<Refund> {
-        furhat.say("Okay, the company understands your decision. We will proceed with the refund of the total amount you paid for the initial order.")
+        furhat.say("Okay, the company understands your decision. We will proceed with the refund of the " +
+                "total amount you paid for the initial order.")
         furhat.ask(" Is there anything else I can help you with?")
     }
 
     onResponse<CompensationOption> {
-        furhat.say("We have $(Compensation().optionsToText()")
+        furhat.say("We have ${Compensation().optionsToText()}")
         furhat.ask("Does any of this alternatives work for you?")
     }
 }

@@ -36,11 +36,22 @@ val CustomerSupport = state {
         furhat.ask("Do you have a reference number of your order?")
     }
 
+
+    onResponse<IdentifyProblem> {
+        val products = it.intent.products
+        if (products != null) {
+            goto(compensationGranted(products))
+        }
+        else {
+            propagate()
+        }
+    }
+
     onResponse<OrderNumber> {
         furhat.say {
             +"Thank you. I confirm the order is ${it.intent.reference}. "
             +"Please wait a few minutes while I check our database."
-            +delay(5000)
+            +delay(3000)
             +blocking {
                 furhat.gesture(Gestures.CloseEyes)
                 furhat.gesture(Gestures.Shake, async = false)
@@ -68,4 +79,36 @@ val CustomerSupport = state {
         furhat.say("We have ${Compensation().optionsToText()}")
         furhat.ask("Does any of this alternatives work for you?")
     }
+
+    onResponse<GetCompensation> {
+        furhat.say("I understand that you want to proceed with ${it.intent.compensation}")
+        furhat.ask("I will proceed with the compensation then!")
+    }
+
+    onResponse<Thanks> {
+        furhat.say("Okay. You had a problem with your ${users.current.productproblem.products}.")
+        furhat.say("You have chosen to get a compensation of ${users.current.chosencompensation.compensation}.")
+        furhat.say("Have a nice day!")
+    }
+}
+
+
+fun compensationGranted(products: ProductList) : State = state {
+    onEntry {
+        furhat.say("I understand that you have an issue with your ${products.text}, Let me check!")
+        products.list.forEach {
+            users.current.productproblem.products.list.add(it)
+        }
+        furhat.ask("Do you have a reference number of your order?")
+    }
+
+    onReentry {
+        furhat.ask("Can I help you with anything else?")
+    }
+
+    onResponse<No> {
+        furhat.say("Okay, You had a problem with your product ${users.current.productproblem.products}")
+        furhat.say()
+    }
+
 }

@@ -31,6 +31,7 @@ class OrderNumber(val reference: Reference? = null) : Intent () {
         return listOf("Yes, my order is @reference", "@reference", "the number is @reference")
     }
 }
+
 class Compensation : EnumEntity(stemming = true, speechRecPhrases = true ) {
     override fun getEnum(lang: Language): List<String> {
         return listOf("25% discount in new products",
@@ -46,6 +47,7 @@ class Refund : Intent() {
         "I would like a refund")
     }
 }
+
 class CompensationOption: Intent() {
     override fun getExamples(lang: Language): List<String> {
         return listOf(" What compensation plans do you have?",
@@ -54,6 +56,16 @@ class CompensationOption: Intent() {
         "What about getting a different product?")
     }
 }
+
+class GetCompensation(val compensation: CompensationList? = null) : Intent() {
+    override fun getExamples(lang: Language): List<String> {
+        return listOf("Yes, I want @compensation",
+                "I will choose @compensation",
+                "the @compensation works for me")
+    }
+}
+
+
 
 class ProductList : ListEntity<QuantifiedProduct> ()
 
@@ -68,5 +80,21 @@ class QuantifiedProduct(
 
     override fun toText(): String {
         return generate("$count $product")
+    }
+}
+
+
+// Compensation chosen
+class CompensationList : ListEntity<TypeCompensation> ()
+
+class TypeCompensation(
+        val compensation: Compensation? = null) : ComplexEnumEntity() {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf("@compensation")
+    }
+
+    override fun toText(): String {
+        return generate("$compensation")
     }
 }

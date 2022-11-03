@@ -4,7 +4,6 @@ import furhatos.flow.kotlin.*
 import furhatos.nlu.common.*
 import furhatos.app.myfirstskill.nlu.*
 import furhatos.gestures.Gestures
-import furhatos.records.Location
 
 val CustomerSupport = state {
     onEntry {
@@ -25,7 +24,7 @@ val CustomerSupport = state {
         goto(Idle)
     }
 
-    onResponse<IdentifyProblem> {
+/*    onResponse<IdentifyProblem> {
         val products = it.intent.products
         if (products != null) {
             furhat.say("I understand that you have an issue with your ${products.text}, Let me check!")
@@ -34,17 +33,33 @@ val CustomerSupport = state {
             }
         }
         furhat.ask("Do you have a reference number of your order?")
-    }
+    }*/
 
 
     onResponse<IdentifyProblem> {
         val products = it.intent.products
         if (products != null) {
-            goto(compensationGranted(products))
+            goto(compensationAssesment(products))
         }
         else {
             propagate()
         }
+    }
+
+}
+
+
+fun compensationAssesment(products: ProductList) : State = state {
+    onEntry {
+        furhat.say("I understand that you have an issue with your ${products.text}, Let me check!")
+        products.list.forEach {
+            users.current.productproblem.products.list.add(it)
+        }
+        furhat.ask("Do you have a reference number of your order?")
+    }
+
+    onReentry {
+        furhat.ask("Can I help you with anything else?")
     }
 
     onResponse<OrderNumber> {
@@ -69,6 +84,11 @@ val CustomerSupport = state {
         furhat.ask("Does any of this alternatives work for you?")
     }
 
+    onResponse<No> {
+        furhat.say("We have other compensation plans, or we can refund the money")
+        furhat.ask("Which one do you prefer?")
+    }
+
     onResponse<Refund> {
         furhat.say("Okay, the company understands your decision. We will proceed with the refund of the " +
                 "total amount you paid for the initial order.")
@@ -86,29 +106,10 @@ val CustomerSupport = state {
     }
 
     onResponse<Thanks> {
-        furhat.say("Okay. You had a problem with your ${users.current.productproblem.products}.")
+        furhat.say("Okay. You requested customer support because you had a problem with your ${users.current.productproblem.products}.")
         furhat.say("You have chosen to get a compensation of ${users.current.chosencompensation.compensation}.")
+        furhat.say("You will received an email with all the information!")
         furhat.say("Have a nice day!")
+        goto(Idle)
     }
-}
-
-
-fun compensationGranted(products: ProductList) : State = state {
-    onEntry {
-        furhat.say("I understand that you have an issue with your ${products.text}, Let me check!")
-        products.list.forEach {
-            users.current.productproblem.products.list.add(it)
-        }
-        furhat.ask("Do you have a reference number of your order?")
-    }
-
-    onReentry {
-        furhat.ask("Can I help you with anything else?")
-    }
-
-    onResponse<No> {
-        furhat.say("Okay, You had a problem with your product ${users.current.productproblem.products}")
-        furhat.say()
-    }
-
 }

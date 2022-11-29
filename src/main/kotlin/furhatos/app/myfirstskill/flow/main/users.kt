@@ -8,13 +8,14 @@ class ProductData (
         var products : ProductList = ProductList()
 )
 
-class CompensationData (
-        var compensation: CompensationList = CompensationList()
-)
 
 val User.productproblem : ProductData
     get() = data.getOrPut(ProductData::class.qualifiedName, ProductData())
 
+// To store the compensation chosen by our user
+class CompensationData (
+        var compensation: CompensationList = CompensationList()
+)
 
 val User.chosencompensation : CompensationData
     get() = data.getOrPut(CompensationData::class.qualifiedName, CompensationData())

@@ -39,7 +39,7 @@ val CustomerSupport = state {
     onResponse<IdentifyProblem> {
         val products = it.intent.products
         if (products != null) {
-            goto(compensationAssesment(products))
+            goto(compensationAssessment(products))
         }
         else {
             propagate()
@@ -49,7 +49,7 @@ val CustomerSupport = state {
 }
 
 
-fun compensationAssesment(products: ProductList) : State = state {
+fun compensationAssessment(products: ProductList) : State = state {
     onEntry {
         furhat.say("I understand that you have an issue with your ${products.text}, Let me check!")
         products.list.forEach {
